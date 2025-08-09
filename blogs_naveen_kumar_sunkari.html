@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Blogs — Single Page</title>
+<style>
+    :root{
+        --sidebar-bg: #0f172a;
+        --accent: #0ea5a4;
+        --panel-bg: #ffffff;
+        --muted: #6b7280;
+    }
+    *{box-sizing:border-box}
+    body{
+        margin:0;
+        font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+        height:100vh;
+        display:flex;
+        background:#eef2ff;
+    }
+
+    /* Left sidebar */
+    #sidebar{
+        width:220px;
+        background:linear-gradient(180deg,#0b1220,#132031);
+        color:#fff;
+        padding:20px;
+        border-right: 1px solid rgba(255,255,255,0.03);
+    }
+    #sidebar h1{
+        font-size:20px;
+        margin:0 0 18px 0;
+        color:#fff;
+        letter-spacing:0.4px;
+    }
+    .main-btn{
+        display:block;
+        width:100%;
+        text-align:left;
+        padding:10px 12px;
+        margin:8px 0;
+        border-radius:8px;
+        background:rgba(255,255,255,0.03);
+        color:#e6eef8;
+        border: none;
+        cursor:pointer;
+        font-weight:600;
+    }
+    .main-btn:hover{ background: rgba(255,255,255,0.06); transform: translateX(2px); }
+
+    /* Owner control */
+    #owner-controls {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255,255,255,0.04);
+      color: #cfe9e6;
+      font-size:13px;
+    }
+    #owner-controls button{
+      margin-top:8px;
+      padding:8px;
+      width:100%;
+      border-radius:6px;
+      border:none;
+      cursor:pointer;
+      font-weight:700;
+      color:#072a2a;
+      background: #a7f3d0;
+    }
+
+    /* Main area containing subtopic column + content */
+    #main{
+        flex:1;
+        display:flex;
+        min-width:0;
+    }
+
+    /* Middle subtopic column */
+    #subcol{
+        width:260px;
+        background: #f8fafc;
+        border-right:1px solid #e6eef8;
+        padding:16px;
+        overflow:auto;
+    }
+    #subcol h2{
+        margin:0 0 12px 0;
+        font-size:16px;
+        color: #0f172a;
+    }
+    .subtopics{
+        display:flex;
+        flex-direction:column;
+        gap:8px;
+    }
+
+    /* colorized subtopic link */
+    .subtopic-link{
+        display:block;
+        padding:10px 12px;
+        border-radius:10px;
+        color:white;
+        text-decoration:none;
+        font-weight:700;
+        box-shadow: 0 4px 10px rgba(16,24,40,0.06);
+        transition: transform .14s ease, background .25s ease;
+    }
+
+    /* multiple colorful gradients — choose by data-color attribute */
+    .subtopic-link[data-color="1"]{ background: linear-gradient(90deg,#ff7e5f,#feb47b); }
+    .subtopic-link[data-color="2"]{ background: linear-gradient(90deg,#6a11cb,#2575fc); }
+    .subtopic-link[data-color="3"]{ background: linear-gradient(90deg,#f97316,#f43f5e); }
+    .subtopic-link[data-color="4"]{ background: linear-gradient(90deg,#06b6d4,#0ea5a4); }
+    .subtopic-link[data-color="5"]{ background: linear-gradient(90deg,#34d399,#10b981); }
+
+    .subtopic-link:hover{ transform: translateX(6px); filter: brightness(1.03); }
+
+    .subtopic-link.active{
+        box-shadow: 0 8px 22px rgba(2,6,23,0.12);
+        outline: 3px solid rgba(16,185,129,0.08);
+    }
+
+    /* Content panel (right) */
+    #content{
+        flex:1;
+        padding:24px;
+        overflow:auto;
+        background: linear-gradient(180deg,#ffffff,#fbfdff);
+    }
+    #content h3{
+        margin:0 0 12px 0;
+        color:#0f172a;
+        font-size:20px;
+    }
+    #content .meta{ color:var(--muted); margin-bottom:14px; }
+    #content .page-body{ color:#111827; font-size:15px; line-height:1.6; }
+    #content img{ max-width:100%; border-radius:10px; margin-top:12px; display:block; }
+
+    .controls{
+        margin-top:16px;
+        display:flex;
+        gap:10px;
+        align-items:center;
+    }
+    .btn{
+        padding:8px 12px;
+        border-radius:8px;
+        border: none;
+        cursor:pointer;
+        font-weight:600;
+    }
+    .btn-edit{ background: linear-gradient(90deg,#06b6d4,#0891b2); color:#fff; }
+    .btn-save{ background: linear-gradient(90deg,#10b981,#059669); color:#fff; }
+    .btn-cancel{ background: #eef2ff; color:#0f172a; border:1px solid #e6eef8; }
+
+    /* editor textarea */
+    textarea.editor{
+        width:100%;
+        min-height:220px;
+        margin-top:12px;
+        padding:12px;
+        border-radius:8px;
+        border:1px solid #e6eef8;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New", monospace;
+        font-size:14px;
+        color:#0f172a;
+        background: #fff;
+    }
+
+    .hint{ font-size:13px; color:var(--muted); margin-top:10px; }
+
+    @media (max-width:900px){
+        #sidebar{ display:none; }
+        #subcol{ width:180px; }
+    }
+</style>
+</head>
+<body>
+
+  <!-- LEFT: Main headings -->
+  <aside id="sidebar" aria-label="Main topics">
+    <h1>Blogs</h1>
+    <button class="main-btn" onclick="showSection('linux')">Linux</button>
+    <button class="main-btn" onclick="showSection('qnx')">QNX</button>
+    <button class="main-btn" onclick="showSection('android')">Android</button>
+
+    <div id="owner-controls">
+      <div id="owner-status" style="color:#dff7f1; font-weight:700; font-size:13px;">Not owner</div>
+      <button id="owner-btn">Owner</button>
+      <div class="hint">Owner mode required to edit pages.</div>
+    </div>
+  </aside>
+
+  <!-- MIDDLE: Subtopic list -->
+  <main id="main">
+    <section id="subcol" aria-label="Subtopics">
+        <h2>Subtopics</h2>
+        <div id="subtopic-list" class="subtopics">
+            <div style="color:var(--muted);">Select a main topic on the left</div>
+        </div>
+    </section>
+
+    <!-- RIGHT: Content -->
+    <section id="content" aria-label="Content area">
+        <h3>Welcome</h3>
+        <div class="meta">Pick a subtopic to view content.</div>
+        <div class="page-body">
+            <p>This is your blog manager UI. Click a main heading to load subtopics, then select a subtopic to view or edit its content.</p>
+        </div>
+    </section>
+  </main>
+
+<script>
+/* ---------------------------
+   Data model + persistence
+   --------------------------- */
+const DEFAULT_PAGES = {
+  "linux-intro": {
+    title: "Intro to Linux",
+    content: `<p>Linux is an open-source operating system kernel derived from UNIX concepts. It powers servers, desktops, embedded systems and more. It's valued for stability, security, and flexibility.</p>
+              <p><img src="https://upload.wikimedia.org/wikipedia/commons/a/af/Tux.png" alt="Tux the Linux penguin"></p>`
+  },
+  "linux-sysprog": {
+    title: "Linux System Programming",
+    content: `<p>Linux system programming involves using system calls (open/read/write), process control (fork/exec), signals, pipes, and inter-process communication to build programs that interface closely with the OS.</p>`
+  },
+  "linux-kernel": {
+    title: "Linux Kernel Programming",
+    content: `<p>Kernel programming covers writing kernel modules, understanding memory management, scheduling, and interacting with hardware from the kernel space.</p>`
+  },
+  "linux-drivers": {
+    title: "Linux Device Drivers",
+    content: `<p>Device drivers provide an interface between hardware devices and the Linux kernel. They translate hardware events into kernel APIs that user-space programs can use.</p>`
+  },
+  "linux-os": {
+    title: "Linux OS Concepts",
+    content: `<p>Core OS concepts include processes, threads, memory management, filesystems, device I/O, networking, and security models that form the backbone of Linux.</p>`
+  }
+};
+
+const SECTIONS = {
+  linux: ["linux-intro","linux-sysprog","linux-kernel","linux-drivers","linux-os"],
+  qnx: [],
+  android: []
+};
+
+// load pages from localStorage if available
+let pages = {};
+try {
+  const raw = localStorage.getItem('blog_pages_v1');
+  pages = raw ? JSON.parse(raw) : DEFAULT_PAGES;
+} catch(e){
+  pages = DEFAULT_PAGES;
+}
+
+// owner auth/state stored in localStorage as:
+// 'blog_owner_hash_v1' (a simple salted hash) and 'blog_owner_logged_v1' boolean
+let isOwner = false;
+function persistPages(){ try{ localStorage.setItem('blog_pages_v1', JSON.stringify(pages)); }catch(e){console.warn(e);} }
+
+/* ---------------------------
+   Owner control helpers
+   --------------------------- */
+const ownerBtn = document.getElementById('owner-btn');
+const ownerStatus = document.getElementById('owner-status');
+
+// very small helper to hash password (not crypto-grade, but acceptable for local UI)
+function simpleHash(s){
+  let h=0; for(let i=0;i<s.length;i++){ h = ((h<<5)-h) + s.charCodeAt(i); h |= 0; } return String(h);
+}
+
+function updateOwnerUI(){
+  const logged = localStorage.getItem('blog_owner_logged_v1') === '1';
+  isOwner = !!logged;
+  ownerStatus.innerText = isOwner ? 'Owner: logged in' : 'Not owner';
+  ownerBtn.innerText = isOwner ? 'Logout' : 'Owner';
+  // re-render current page so Edit button visibility updates
+  if(activePageId) showPage(activePageId);
+}
+
+ownerBtn.onclick = () => {
+  const storedHash = localStorage.getItem('blog_owner_hash_v1');
+  if(!storedHash){
+    // no password set yet — offer to set one
+    const p1 = prompt("Set an owner password (will be stored locally in this browser):");
+    if(p1 && p1.trim().length>0){
+      localStorage.setItem('blog_owner_hash_v1', simpleHash(p1));
+      localStorage.setItem('blog_owner_logged_v1', '1');
+      updateOwnerUI();
+      alert("Owner password set. You are now logged in as owner.");
+    }
+    return;
+  }
+  // if logged in, log out
+  const logged = localStorage.getItem('blog_owner_logged_v1') === '1';
+  if(logged){
+    localStorage.setItem('blog_owner_logged_v1', '0');
+    updateOwnerUI();
+    return;
+  }
+  // otherwise prompt for password
+  const p = prompt("Enter owner password:");
+  if(p === null) return;
+  if(simpleHash(p) === storedHash){
+    localStorage.setItem('blog_owner_logged_v1', '1');
+    updateOwnerUI();
+    alert("Owner login successful.");
+  } else {
+    alert("Incorrect password.");
+  }
+};
+
+/* ---------------------------
+   UI helpers
+   --------------------------- */
+const subtopicListEl = document.getElementById('subtopic-list');
+const contentEl = document.getElementById('content');
+
+let activePageId = null;
+
+function clearActiveInSubtopics(){
+  const els = document.querySelectorAll('.subtopic-link');
+  els.forEach(e => e.classList.remove('active'));
+}
+
+/* choose a color index for subtopic by position (1..5 rotates) */
+function colorIndexForPos(i){
+  return ((i % 5) + 1);
+}
+
+/* showSection: populate subtopics column for a main topic */
+function showSection(sectionId){
+  const ids = SECTIONS[sectionId] || [];
+  subtopicListEl.innerHTML = '';
+  if(ids.length === 0){
+    subtopicListEl.innerHTML = `<div style="color:var(--muted)">No topics yet</div>`;
+    return;
+  }
+
+  ids.forEach((id, idx) => {
+    const page = pages[id] || { title: id, content: "<p>(empty)</p>" };
+    const a = document.createElement('a');
+    a.href = "javascript:void(0)";
+    a.className = 'subtopic-link';
+    a.setAttribute('data-color', String(colorIndexForPos(idx)));
+    a.innerText = page.title;
+    a.onclick = () => { showPage(id); highlightSubtopic(id); };
+    subtopicListEl.appendChild(a);
+  });
+}
+
+/* highlight the active link */
+function highlightSubtopic(id){
+  clearActiveInSubtopics();
+  activePageId = id;
+  const links = document.querySelectorAll('.subtopic-link');
+  links.forEach(link => {
+    if(link.innerText === (pages[id] ? pages[id].title : id)){
+      link.classList.add('active');
+    }
+  });
+}
+
+/* showPage: render page content on right; only show Edit button if owner */
+function showPage(pageId){
+  const p = pages[pageId];
+  if(!p) return;
+  activePageId = pageId;
+
+  // render core content
+  contentEl.innerHTML = `
+    <h3>${escapeHtml(p.title)}</h3>
+    <div class="meta">Page ID: <code style="color:var(--muted)">${pageId}</code></div>
+    <div class="page-body" id="page-body">${p.content}</div>
+    <div class="controls" id="controls-area"></div>
+  `;
+
+  // append Edit button only if owner is logged in
+  if(localStorage.getItem('blog_owner_logged_v1') === '1'){
+    const controls = document.getElementById('controls-area');
+    const editBtn = document.createElement('button');
+    editBtn.className = 'btn btn-edit';
+    // tooltip contains the HTML allowed/local save message
+    editBtn.title = "HTML allowed (you can add <img src='...'>). Changes are saved locally in this browser.";
+    editBtn.innerText = 'Edit';
+    editBtn.onclick = () => enterEdit(pageId);
+    controls.appendChild(editBtn);
+  }
+
+  highlightSubtopic(pageId);
+}
+
+/* utility to escape text for title display */
+function escapeHtml(s){
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+/* enterEdit: show textarea with Save/Cancel + Insert Image; shows hint inside editor */
+function enterEdit(pageId){
+  const p = pages[pageId];
+  if(!p) return;
+  contentEl.innerHTML = `
+    <h3>Editing: ${escapeHtml(p.title)}</h3>
+    <div class="meta">Page ID: <code style="color:var(--muted)">${pageId}</code></div>
+    <textarea class="editor" id="editor-area"></textarea>
+    <div style="margin-top:10px; display:flex; gap:8px; align-items:center;">
+      <button class="btn btn-save" id="save-btn">Save</button>
+      <button class="btn btn-cancel" id="cancel-btn">Cancel</button>
+      <button class="btn" id="insert-img-btn" title="Insert image tag">&lt;img&gt;</button>
+      <div class="hint">HTML allowed (you can add &lt;img src='...'&gt;). Changes are saved locally in this browser.</div>
+    </div>
+  `;
+  const ta = document.getElementById('editor-area');
+  ta.value = p.content;
+
+  document.getElementById('save-btn').onclick = () => {
+    const newHtml = ta.value;
+    pages[pageId].content = newHtml;
+    persistPages();
+    showPage(pageId);
+  };
+  document.getElementById('cancel-btn').onclick = () => { showPage(pageId); };
+  document.getElementById('insert-img-btn').onclick = () => {
+    const url = prompt("Image URL (https://...):");
+    if(url){
+      const imgTag = `<p><img src="${url}" alt=""></p>`;
+      insertAtCursor(ta, imgTag);
+    }
+  };
+}
+
+/* helper to insert text at cursor position in textarea */
+function insertAtCursor(textarea, text){
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const before = textarea.value.substring(0, start);
+  const after = textarea.value.substring(end);
+  textarea.value = before + text + after;
+  const pos = before.length + text.length;
+  textarea.setSelectionRange(pos, pos);
+  textarea.focus();
+}
+
+/* on initial load, show linux section */
+showSection('linux');
+updateOwnerUI();
+
+/* If a page id is supplied via hash, load it (optional convenience) */
+(function loadFromHash(){
+  const hash = location.hash.replace('#','');
+  if(hash){
+    if(pages[hash]) {
+      for(const sec in SECTIONS){
+        if(SECTIONS[sec].includes(hash)){
+          showSection(sec);
+          showPage(hash);
+          return;
+        }
+      }
+    }
+  }
+})();
+
+</script>
+</body>
+</html>
