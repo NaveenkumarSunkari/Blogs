@@ -1,0 +1,52 @@
+ make ARCH=um defconfig
+ make ARCH=um -j$(nproc)
+./linux rootfstype=hostfs rootflags=/ rw mem=64M init=/bin/sh
+
+Downloading the Kernel and extract
+www.kernel.org
+# wget https://mirrors.edge.kernel.org/pub/linux/kernel/v5.x/linux-5.10.112.tar.gz
+ Extract Linux Kernel
+# tar -xvzf linux-5.10.112.tar.gz
+ Setup configuration file
+# cd linux-5.10.112/
+# make ARCH=um defconfig
+ Configuring the Kernel
+# make ARCH=um menuconfig
+11Building UML Kernel Image
+ Build Kernel
+# make ARCH=um
+ Boot system with local system rootfs
+# ./bin/linux rootfstype=hostfs rootflags=/ rw mem=64M init=/bin/sh
+ Boot system with rootfs [ Built using Busybox as shown above]
+# ./bin/linux rootfstype=hostfs rootflags=/home/test/uml/rootfs/ rw mem=64M init=/bin/sh
+ Boot system with filesystem
+# ./linux-5.1.16/vmlinux ubda=Debian-Wheezy-AMD64-root_fs rw mem=512M umid=Debian
+# login as root
+
+
+-------------------------------------------------------------------
+RFS using busybox:
+ Download Busy Box
+# wget https://www.busybox.net/downloads/busybox-1.33.1.tar.bz2
+ Extract Busy Box
+# tar -xvjf busybox-1.33.1.tar.bz2
+ Setup Default Busy Box
+# make defconfig ARCH=um
+ Configure Busy Box
+# make menuconfig ARCH=um
+<Enable static linking>
+7Building UML Busybox
+ Build Busy Box
+# make ARCH=um
+ Install Busy Box
+# make install ARCH=um
+8Setting up UML rootfs
+ Untar rootfs base
+# sudo tar -xvzf rootfs_base.tar.gz
+ Create rootfs folder and copy content of rootfs base here
+# mkdir rootfs
+# cd rootfs
+# sudo cp -rf ../rootfs_base/* .
+ Enter rootfs directory and copy content of busybox here
+# cd rootfs
+# sudo cp -rf ../busybox-1.33.1/_install/* .
