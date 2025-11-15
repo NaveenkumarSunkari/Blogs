@@ -1,0 +1,7 @@
+1. Types of Linux kernel?
+- Mainline
+- Stable
+- Long-term
+
+2. How to download particular Linux kernel version?
+git clone --branch v6.1 https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
