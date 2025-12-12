@@ -1,0 +1,18 @@
+
+To find the size of the folders in order
+$ du -sh * |sort -h
+
+To know the system memory
+$ free -h
+
+To know cpu information
+$ cat /proc/cpuinfo
+
+To know linux kernel version
+$ uname -a (or) $uname -r
+
+To know ubuntu version:
+$ lsb_release -a
+
+To know dependent libraries info:
+$ ldd asdf.bin
