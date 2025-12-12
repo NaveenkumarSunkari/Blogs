@@ -1,0 +1,17 @@
+
+Flashing tools:
+$ fastboot devices
+$ fastboot flash <partition> <image.img>
+
+To enable/disable SeLinux:
+$ getenforce
+$ setenforce <1/0>
+
+
+Debugging:
+$ adb devices
+$ adb shell
+
+
+Logs:
+$ logcat
