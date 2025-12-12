@@ -1,0 +1,18 @@
+Logging:
+$slog2info
+
+Kernel logging:
+$tracelogger
+
+
+To know processes info
+$ pidin ar
+
+
+To know pririoty of the processes
+$ pidin P
+
+To know Security policies of the processes
+$ pidin -f a_n
+
+
